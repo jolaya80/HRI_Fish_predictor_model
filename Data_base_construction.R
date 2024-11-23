@@ -27,8 +27,8 @@ BenthicCover_2023 <- BenthicCover %>%
          tFMAavg, # Fleshy Macroalgae cover (average) group of all sp codes
          tFMAstd, # Fleshy Macroalgae cover (sd) group of all sp codes
   ) %>%
-  mutate(YEAR = 2023) %>% # add column for year and fill with 2023
-  rename(Site = Name)
+  mutate(YEAR = 2023) # add column for year and fill with 2023
+
 head(BenthicCover_2023) 
 
 # Because the values from 2023 are in proportion, it is needed to multiply by 100 to converted in percentage
@@ -56,7 +56,8 @@ BenthicCover_2011_2021 <- BenthicCoverBySite %>%
          LCstd, # % live (sd) stony coral coverage
          FMAavg,# % Algae-Macro-Fleshy (average)
          FMAstd) %>% # % Algae-Macro-Fleshy (sd)
-  rename(tCORALavg = LCavg,
+  rename(Name = Site,
+         tCORALavg = LCavg,
          tCORALstd = LCstd,
          tFMAavg = FMAavg,
          tFMAstd = FMAstd)
@@ -307,6 +308,18 @@ ggplot(avg_herbi_biomass, aes(x = YEAR, y = avg_cover, group = 1)) +
   labs(x = "Year", y = "Average Biomass", title = "Average Biomass Over Time") +
   theme_minimal()
 
+## create the final data bases integrating average by year by site for all variables
+## dataframes: 
+Belize_BenthicCover
+Commercial_fish_Biomass
+Herbivorous_fish_Biomass
+
+ResponseVariables <- merge(Belize_BenthicCover, Commercial_fish_Biomass, 
+                                  by = c("Code", 
+                                         "Name", 
+                                         "Latitude", 
+                                         "Longitude",
+                                         "YEAR"), all = TRUE) 
 
 
 
