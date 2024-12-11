@@ -17,7 +17,7 @@ Fleshy Macro algae Cover: The proportion of the reef covered by fleshy macro alg
 
 FISH ABUNDANCE
 
-For the purposes of this work, only Grouper, Jacks, Barracuda and Snapper fish families were included in the commercial fish biomass calculation, and only fish species within the Parrotfish and Surgeon fish families were included in the herbivorous fish biomass calculation.
+For the purposes of this work, only grouper, jacks, barracuda and snapper fish families were included in the commercial fish biomass calculation, and only fish species within the Parrotfish and Surgeon fish families were included in the herbivorous fish biomass calculation.
 
 Fish biomass estimates from size class and length-weight formulas for each surveyed species are calculated by family. Biomass for each individual fish is calculated as a * (S * TL2FL)b, where a and b are the species biomass curve coefficients, S is the size (usually the size class midpoint for the AGRRA fishes), and TL2FL is a species total length to fork length conversion factor, if necessary, depending on the species coefficients provided in FishBase. The current data uses coefficient values collected for each species from FishBase in 2013 (values available upon request).
 
