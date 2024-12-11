@@ -6,7 +6,7 @@ library(quantmod)
 library(scales)
 library(readxl)
 library(car)
-library(dunn.test)
+
 
 # load data
 BenthicCover <- read_excel("data/BenthicCover_2023.xlsx", sheet = "Overall")
@@ -21,7 +21,7 @@ BenthicCover_2023 <- BenthicCover %>%
          Name, # name of the survey or the reef where the survey took place
          Latitude, 
          Longitude, 
-         "Reef Type", #reef large sclae morphology
+         "Reef Type", #reef large scale morphology
          tCORALavg,	# Coral cover (average) group of all Corals codes
          tCORALstd, # Coral cover (sd) group of all Corals codes
          tFMAavg, # Fleshy Macroalgae cover (average) group of all sp codes
@@ -78,7 +78,7 @@ BenthicCover_2011_2021 <- BenthicCover_2011_2021 %>%
 # Merge the two data frames -BenthicCover_2023 y BenthicCover_2011_2021 
 Belize_BenthicCover <- merge(BenthicCover_2023, BenthicCover_2011_2021, 
                              by = c("Code", 
-                                    "Site", 
+                                    "Name", 
                                     "Latitude", 
                                     "Longitude", 
                                     "tCORALavg", 
@@ -310,19 +310,78 @@ ggplot(avg_herbi_biomass, aes(x = YEAR, y = avg_cover, group = 1)) +
 
 ## create the final data bases integrating average by year by site for all variables
 ## dataframes: 
-Belize_BenthicCover
-Commercial_fish_Biomass
-Herbivorous_fish_Biomass
+#Belize_BenthicCover
+#Commercial_fish_Biomass
+#Herbivorous_fish_Biomass
+
+## data set with avergae values and sd of corals, algae, fish family, and total biomass of fish
 
 ResponseVariables <- merge(Belize_BenthicCover, Commercial_fish_Biomass, 
                                   by = c("Code", 
                                          "Name", 
                                          "Latitude", 
                                          "Longitude",
-                                         "YEAR"), all = TRUE) 
+                                         "YEAR",
+                                         "Depth",
+                                         "Reef Type"), all = TRUE)
 
+ResponseVariables_full <- merge(ResponseVariables, Herbivorous_fish_Biomass, 
+                                by = c("Code", 
+                                       "Name", 
+                                       "Latitude", 
+                                       "Longitude",
+                                       "YEAR",
+                                       "Depth",
+                                       "Reef Type"), all = TRUE)
 
+ResponseVariables_full$YEAR <- as.character(ResponseVariables_full$YEAR)
 
+# Save the data frame as a CSV file
+write.csv(ResponseVariables_full, file = "ResponseVariables_full.csv", row.names = FALSE)
+ResponseVariables_full <- read.csv("ResponseVariables_full.csv")
 
+### Select the columns to input as response variables and only years 2018, 2021 and 2023
+ResponseVariables_filter <- ResponseVariables_full %>%
+  select(Code,
+         Name,
+         Latitude,
+         Longitude,
+         YEAR,
+         tCORALavg,
+         tFMAavg,
+         tCommBiomass,
+         tHerbiBiomass) %>%
+  filter(YEAR >= 2018 & YEAR <= 2023)  # Select data from years 
 
+## calculate the average for the 3 years
+ResponseVariables_input <- ResponseVariables_filter %>%
+  filter(!all(is.na(.))) %>%  # Keep rows with at least one non-NA value
+  group_by(Latitude,
+           Longitude) %>%
+  summarize(Coral_cover = mean(tCORALavg, na.rm = TRUE),
+            Algae_cover = mean(tFMAavg, na.rm = TRUE),
+            Commercial_fish_abu = mean(tCommBiomass, na.rm = TRUE),
+            Herbivorous_fish_abu = mean(tHerbiBiomass, na.rm = TRUE))
 
+# Save the data frame as a CSV file
+write.csv(ResponseVariables_input, file = "ResponseVariables_input.csv", row.names = FALSE)
+
+ResponseVariables_input <- read.csv("ResponseVariables_input.csv")
+#######
+# Dispersion plot
+ggplot(ResponseVariables_input, aes(x = Commercial_fish_abu, y = Coral_cover)) +
+  geom_point() +
+  labs(x = "Commercial fish abundance", y = "Coral cover")
+
+ggplot(ResponseVariables_input, aes(x = Herbivorous_fish_abu, y = Algae_cover)) +
+  geom_point() +
+  labs(x = "Herbivorous fish abundance", y = "Fleshy Algae cover")
+
+ResponseVariables_input <- ResponseVariables_input %>%
+  group_by(Latitude, Longitude) %>%
+  summarize(
+    Coral_cover = mean(Coral_cover, na.rm = TRUE),
+    Algae_cover = mean(Algae_cover, na.rm = TRUE),
+    Commercial_fish_abu = mean(Commercial_fish_abu, na.rm = TRUE),
+    Herbivorous_fish_abu = mean(Herbivorous_fish_abu, na.rm = TRUE)
+  )
