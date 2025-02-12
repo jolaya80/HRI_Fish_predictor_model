@@ -1,0 +1,131 @@
+---
+title: "Correlation matrix oceanographic variables"
+output: html_notebook
+---
+
+
+```{r}
+library(dplyr)
+library(corrplot)
+library(ggplot2)
+library(tidyverse)
+library(MASS) # for boxcox function
+library(car)
+```
+Define the folder paths
+```{r}
+Fig_output_folder <- "C:/Users/jolaya/Documents/GitHub_projects/HRI_Fish_predictor_model/results/figures"
+
+Table_output_folder <- "C:/Users/jolaya/Documents/GitHub_projects/HRI_Fish_predictor_model/results/tables"
+
+```
+
+Input data with the response and depdendent variables. This data frame contains the marine predictors created in ArcGis using as Input layer: Bathymetry 10m from TNC. Spatial resolution 10 x 10 m.
+
+```{r}
+HRI_variables <- read.csv("G:/Shared drives/NSF CoPE internal/GIS_CoPE/GIS_Belize/2_model_inputs_belize/coral_reef_modeling/01_input_csv/HRI_var_10m.csv")
+
+# change column names
+HRI_variables <- HRI_variables %>%
+  rename(x = Latitude,  
+         y = Longitude,  
+         cor = Coral_cove, 
+         algae = Algae_cove,
+         fish_com = Commercial,
+         fish_her = Herbivorou,       
+         aspect_std_curv = aspect_s_c,
+         slopeslope_240  = sloslo_240,
+         slopeslope = slopeslop,
+         bathy = bz_bathy
+  )
+
+
+```
+
+Keep only oceanographic variables variables in the data frame.
+As a result of marine predictors construction some values get -9999 but they are NA.
+```{r}
+colum_excluir <- c("x","y","cor","algae","fish_com","fish_her")
+
+data <- HRI_variables[, !names(HRI_variables) %in% colum_excluir] %>%
+  mutate(across(where(is.numeric), ~ifelse(. == -9999.000, NA, .)))
+
+print(data)
+```
+
+ 
+```{r}
+# Filtrar filas con datos completos
+data_complete <- na.omit(data)  
+```
+
+Then we calculate the correlation matrix
+```{r}
+# Calcular la matriz de correlación
+cor_matrix <- cor(data_complete, use = "complete.obs", method = "pearson")
+
+# Save the plots
+png(filename = file.path(Fig_output_folder, "correlation_all_vbles.png"), width = 6, height = 6, units = "in", res = 300)
+
+# Visualizar la matriz de correlación
+cor_all <- corrplot(cor_matrix, 
+         method = "number",
+         type = "upper",
+         diag = FALSE,
+         number.cex = 0.7)
+
+dev.off()
+```
+
+
+Remove the variables that have correlations <0.7
+curv_pro, curv_plan, slopeslope_240 
+
+```{r}
+exclude_vbles <- c("curv_pro", "curv_plan", "slopeslope_240")
+
+data.cor <- data_complete[, !names(data_complete) %in% exclude_vbles]
+```
+
+Then we calculate the correlation matrix again
+```{r}
+# Calcular la matriz de correlación
+cor_matrix.2 <- cor(data.cor, use = "complete.obs", method = "pearson")
+
+# Save the plots
+png(filename = file.path(Fig_output_folder, "correlation_final.png"), width = 6, height = 6, units = "in", res = 300)
+
+# Visualizar la matriz de correlación
+corrplot(cor_matrix.2, 
+         method = "number",
+         type = "upper",
+         diag = FALSE,
+         number.cex = 0.7)
+```
+
+```{r}
+# Export table to used in the model
+
+data_model <- HRI_variables[, !names(HRI_variables) %in% exclude_vbles] 
+
+setwd("G:/Shared drives/NSF CoPE internal/GIS_CoPE/GIS_Belize/2_model_inputs_belize/coral_reef_modeling")
+
+# Export using base R
+write.csv(data_model, file = file.path("G:/Shared drives/NSF CoPE internal/GIS_CoPE/GIS_Belize/2_model_inputs_belize/coral_reef_modeling/01_input_csv", "HRI_variables.csv"), row.names = FALSE)
+```
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+

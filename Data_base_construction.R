@@ -119,6 +119,19 @@ ggplot(avg_CoralCover, aes(x = YEAR, y = avg_cover, group = 1)) +
   theme_minimal()
 
 #####################################################################
+### summary benthic data
+library(gtsummary)
+
+df_coral <- Belize_BenthicCover%>%
+  tbl_summary(by = YEAR, 
+              include = c(,Name,"Reef Type"),
+              label = list(Name ~ "Name",
+                           "Reef Type" ~ "Reef Type")) %>%
+  modify_header(label = "**Variable**") %>%
+  bold_labels() %>%
+  modify_caption("**Table 1. Summary of the surveyed sites in the fish dataset from 2016 to 2022 in Florida**")
+
+#####################################################################
 ### FISH ABUNDANCE
 
 # load data
