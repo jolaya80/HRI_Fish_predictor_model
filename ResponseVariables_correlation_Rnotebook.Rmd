@@ -108,10 +108,9 @@ corrplot(cor_matrix.2,
 
 data_model <- HRI_variables[, !names(HRI_variables) %in% exclude_vbles] 
 
-setwd("G:/Shared drives/NSF CoPE internal/GIS_CoPE/GIS_Belize/2_model_inputs_belize/coral_reef_modeling")
 
 # Export using base R
-write.csv(data_model, file = file.path("G:/Shared drives/NSF CoPE internal/GIS_CoPE/GIS_Belize/2_model_inputs_belize/coral_reef_modeling/01_input_csv", "HRI_variables.csv"), row.names = FALSE)
+write.csv(data_model, file = file.path("G:/Shared drives/NSF CoPE internal/GIS_CoPE/GIS_Belize/2_model_inputs_belize/coral_reef_modeling/01_input_csv", "bz_data_model.csv"), row.names = FALSE)
 ```
 
 
